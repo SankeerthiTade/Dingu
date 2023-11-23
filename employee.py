@@ -1,69 +1,68 @@
 import streamlit as st
-import pandas as pd
-
-class EmployeePerformanceCalculator:
-    def __init__(self, name, department, emp_id, project_name, start_date, end_date, tasks_assigned, tasks_pending, leaves_taken, attendance_monthly, attendance_daily):
+ 
+class Employee:
+    def __init__(self, name, assigned_tasks, total_attendance, total_leaves):
         self.name = name
-        self.department = department
-        self.emp_id = emp_id
-        self.project_name = project_name
-        self.start_date = start_date
-        self.end_date = end_date
-        self.tasks_assigned = tasks_assigned
-        self.tasks_pending = tasks_pending
-        self.leaves_taken = leaves_taken
-        self.attendance_monthly = attendance_monthly
-        self.attendance_daily = attendance_daily
-
+        self.assigned_tasks = assigned_tasks
+        self.completed_tasks = 0
+        self.total_attendance = total_attendance
+        self.total_leaves = total_leaves
+ 
+    def complete_task(self, tasks_completed):
+        self.completed_tasks += tasks_completed
+ 
     def calculate_performance(self):
-        task_status = "Exuberant" if self.tasks_pending == 0 else "Average" if self.tasks_pending <= self.tasks_assigned / 2 else "Poor"
-        leave_status = "Excellent" if self.leaves_taken == 0 else "Fair" if self.leaves_taken <= 2 else "Unfair"
-
-        return task_status, leave_status
-
+        task_performance = (self.completed_tasks / self.assigned_tasks) * 100
+        attendance_percentage = (self.total_attendance / 30) * 100  # Assuming 30 working days in a month
+        # Penalty for leaves beyond 3
+        leaves_penalty = max(0, self.total_leaves - 3)
+        leave_percentage = max(0, 100 - (leaves_penalty * 5))  # Assuming a penalty of 5% for each leave beyond 3
+        overall_performance = (task_performance + attendance_percentage + leave_percentage) / 3
+        return overall_performance
+ 
+# Streamlit web application with a consolidated table for all employees
 def main():
     st.title("Employee Performance Calculator")
-
-    # Data storage
-    employee_data = []
-
-    # Function to add a new employee
-    def add_employee():
-        name = st.text_input("Name:")
-        department = st.text_input("Department:")
-        emp_id = st.text_input("Employee ID:")
-        project_name = st.text_input("Project Name:")
-        start_date = st.date_input("Project Starting Date:")
-        end_date = st.date_input("Project Ending Date:")
-        tasks_assigned = st.number_input("Number of Tasks Assigned:", min_value=0)
-        tasks_pending = st.number_input("Number of Tasks Pending:", min_value=0, max_value=tasks_assigned)
-        leaves_taken = st.number_input("Number of Leaves Taken:", min_value=0)
-        attendance_monthly = st.number_input("Attendance for the Month (%):", min_value=0, max_value=100)
-        attendance_daily = st.number_input("Daily Attendance (%):", min_value=0, max_value=100)
-
-        employee = EmployeePerformanceCalculator(name, department, emp_id, project_name, start_date, end_date, tasks_assigned, tasks_pending, leaves_taken, attendance_monthly, attendance_daily)
-        employee_data.append(employee)
-
-    # Button to add a new employee
-    if st.button("Add Employee"):
-        add_employee()
-
-    # Display details as a table
-    if employee_data:
-        st.subheader("Employee Details")
-        df = pd.DataFrame([vars(employee) for employee in employee_data])
-        st.table(df)
-
-        # Calculate overall performance metrics for all employees
-        overall_tasks_assigned = sum(employee.tasks_assigned for employee in employee_data)
-        overall_tasks_pending = sum(employee.tasks_pending for employee in employee_data)
-        overall_leaves_taken = sum(employee.leaves_taken for employee in employee_data)
-
-        # Display overall performance status
-        st.subheader("Overall Performance Metrics")
-        st.text(f"Overall Tasks Assigned: {overall_tasks_assigned}")
-        st.text(f"Overall Tasks Pending: {overall_tasks_pending}")
-        st.text(f"Overall Leaves Taken: {overall_leaves_taken}")
-
+ 
+    # Input for the number of employees
+    num_employees = st.number_input("Enter Number of Employees:", min_value=1, step=1)
+ 
+    # List to store Employee objects
+    employees = []
+ 
+    # Input for employee details
+    for i in range(num_employees):
+        st.header(f"Employee {i + 1}")
+        name = st.text_input(f"Enter Employee {i + 1} Name:")
+        assigned_tasks = st.number_input(f"Enter Number of Assigned Tasks for Employee {i + 1}:", min_value=1, step=1)
+        total_attendance = st.number_input(f"Enter Total Attendance for Employee {i + 1} (in days):", min_value=0, max_value=30, step=1)
+        total_leaves = st.number_input(f"Enter Total Leaves for Employee {i + 1} (in days):", min_value=0, max_value=30, step=1)
+ 
+        # Create an instance of the Employee class and add it to the list
+        employee = Employee(name, assigned_tasks, total_attendance, total_leaves)
+        employees.append(employee)
+ 
+        # Input for completed tasks
+        tasks_completed = st.number_input(f"Enter Number of Completed Tasks for Employee {i + 1}:", min_value=0, step=1)
+        employee.complete_task(tasks_completed)
+ 
+    # Display consolidated table for all employees
+    performance_data = []
+    for i, employee in enumerate(employees):
+        performance_percentage = employee.calculate_performance()
+ 
+        performance_data.append({
+            'Employee Name': employee.name,
+            'Assigned Tasks': employee.assigned_tasks,
+            'Completed Tasks': employee.completed_tasks,
+            'Attendance Percentage': (employee.total_attendance / 30) * 100,
+            'Leaves Taken': employee.total_leaves,
+            'Performance Percentage': performance_percentage
+        })
+ 
+    # Display consolidated table
+    st.subheader("Consolidated Employee Performance Table:")
+    st.table(performance_data)
+ 
 if __name__ == "__main__":
     main()

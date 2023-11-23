@@ -56,5 +56,24 @@ def main():
         st.text(f"Overall Tasks Completed: {overall_tasks_completed}")
         st.text(f"Overall Leaves Taken: {overall_leaves_taken}")
 
+        # Bar graph
+        labels = ["Tasks Assigned", "Tasks Completed", "Leaves Taken"]
+        values = [overall_tasks_assigned, overall_tasks_completed, overall_leaves_taken]
+        colors = ['gold', 'lightskyblue', 'lightcoral']
+
+        fig, ax = plt.subplots()
+        bars = ax.bar(labels, values, color=colors)
+
+        # Add labels to each bar
+        for bar, value in zip(bars, values):
+            yval = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2, yval, round(value, 2), ha='center', va='bottom')
+
+        ax.set_ylabel("Count")
+        ax.set_title("Overall Performance Metrics")
+
+        # Display the plot using st.pyplot()
+        st.pyplot(fig)
+
 if __name__ == "__main__":
     main()

@@ -1,27 +1,27 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 class EmployeePerformanceCalculator:
-    def __init__(self, name, department, emp_id, tasks_assigned, tasks_completed, leaves_taken):
+    def __init__(self, name, department, emp_id, tasks_assigned, tasks_completed, leaves_taken, attendance_percentage):
         self.name = name
         self.department = department
         self.emp_id = emp_id
         self.tasks_assigned = tasks_assigned
         self.tasks_completed = tasks_completed
         self.leaves_taken = leaves_taken
+        self.attendance_percentage = attendance_percentage
 
     def calculate_performance(self):
         task_status = "Exuberant" if self.tasks_completed == self.tasks_assigned else "Average" if self.tasks_completed >= self.tasks_assigned / 2 else "Poor"
         leave_status = "Excellent" if self.leaves_taken == 0 else "Fair" if self.leaves_taken <= 2 else "Unfair"
+        attendance_status = "Good" if self.attendance_percentage >= 90 else "Average" if self.attendance_percentage >= 80 else "Poor"
 
-        return task_status, leave_status
+        return task_status, leave_status, attendance_status
 
 def main():
     st.title("Employee Performance Calculator")
-
-    # Section to enter the number of employees
-    num_employees = st.number_input("Enter the number of employees:", min_value=1, value=1, step=1)
 
     # Data storage
     employee_data = []
@@ -34,16 +34,16 @@ def main():
         tasks_assigned = st.number_input("Number of Tasks Assigned:", min_value=0)
         tasks_completed = st.number_input("Number of Tasks Completed:", min_value=0, max_value=tasks_assigned)
         leaves_taken = st.number_input("Number of Leaves Taken:", min_value=0)
+        attendance_percentage = st.number_input("Attendance Percentage:", min_value=0, max_value=100)
 
-        employee = EmployeePerformanceCalculator(name, department, emp_id, tasks_assigned, tasks_completed, leaves_taken)
+        employee = EmployeePerformanceCalculator(name, department, emp_id, tasks_assigned, tasks_completed, leaves_taken, attendance_percentage)
         employee_data.append(employee)
 
     # Button to add a new employee
-    for _ in range(num_employees):
-        if st.button(f"Add Employee {_ + 1}"):
-            add_employee()
+    if st.button("Add Employee"):
+        add_employee()
 
-    # Display details as a table
+    # Display details as a table and lollipop charts
     if employee_data:
         st.subheader("Employee Details")
         df = pd.DataFrame([vars(employee) for employee in employee_data])
@@ -53,31 +53,26 @@ def main():
         overall_tasks_assigned = sum(employee.tasks_assigned for employee in employee_data)
         overall_tasks_completed = sum(employee.tasks_completed for employee in employee_data)
         overall_leaves_taken = sum(employee.leaves_taken for employee in employee_data)
+        overall_attendance_percentage = np.mean([employee.attendance_percentage for employee in employee_data])
 
         # Display overall performance status
         st.subheader("Overall Performance Metrics")
         st.text(f"Overall Tasks Assigned: {overall_tasks_assigned}")
         st.text(f"Overall Tasks Completed: {overall_tasks_completed}")
         st.text(f"Overall Leaves Taken: {overall_leaves_taken}")
+        st.text(f"Overall Attendance Percentage: {overall_attendance_percentage:.2f}%")
 
-        # Bar graph
-        labels = ["Tasks Assigned", "Tasks Completed", "Leaves Taken"]
-        values = [overall_tasks_assigned, overall_tasks_completed, overall_leaves_taken]
-        colors = ['gold', 'lightskyblue', 'lightcoral']
+        # Lollipop chart for overall performance metrics
+        metrics_labels = ["Tasks Assigned", "Tasks Completed", "Leaves Taken", "Attendance Percentage"]
+        metrics_values = [overall_tasks_assigned, overall_tasks_completed, overall_leaves_taken, overall_attendance_percentage]
 
         fig, ax = plt.subplots()
-        bars = ax.bar(labels, values, color=colors)
-
-        # Add labels to each bar
-        for bar, value in zip(bars, values):
-            yval = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2, yval, round(value, 2), ha='center', va='bottom')
-
-        ax.set_ylabel("Count")
+        ax.stem(metrics_labels, metrics_values, basefmt=" ", use_line_collection=True)
         ax.set_title("Overall Performance Metrics")
+        ax.set_ylabel("Count/Percentage")
 
-        # Display the plot using st.pyplot()
-        st.pyplot(fig)
+        # Display the lollipop chart
+        st.write(fig)
 
 if __name__ == "__main__":
     main()

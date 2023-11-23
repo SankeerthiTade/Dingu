@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Employee:
-    # ... (unchanged)
-
 def forecast_performance(employee):
     # Assuming a linear growth trend for the completed tasks
     tasks_forecast = np.linspace(employee.completed_tasks, employee.completed_tasks * 1.2, num=5)

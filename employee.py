@@ -33,10 +33,10 @@ def main():
     st.title("Employee Performance Calculator")
 
     # Data storage
-    student_data = []
+    employee_data = []
 
-    # Function to add a new student
-    def add_student():
+    # Function to add a new employee
+    def add_employee():
         name = st.text_input("Name:")
         department = st.text_input("Department:")
         emp_id = st.text_input("Employee ID:")
@@ -47,26 +47,26 @@ def main():
         tasks_completed = st.number_input("Number of Tasks Completed:", min_value=0, max_value=tasks_assigned)
         tasks_in_progress = st.number_input("Number of Tasks in Progress:", min_value=0, max_value=tasks_assigned - tasks_completed)
         leaves_taken = st.number_input("Number of Leaves Taken:", min_value=0)
-        login_time = st.number_input("Login Time (24-hour format):", min_value=0, max_value=24, step=0.01)
+        login_time = st.number_input("Login Time (24-hour format):", min_value=0.0, max_value=24.0, step=0.01)
 
-        student = EmployeePerformanceCalculator(name, department, emp_id, project_name, start_date, end_date, tasks_assigned, tasks_completed, tasks_in_progress, leaves_taken, login_time)
-        student_data.append(student)
+        employee = EmployeePerformanceCalculator(name, department, emp_id, project_name, start_date, end_date, tasks_assigned, tasks_completed, tasks_in_progress, leaves_taken, login_time)
+        employee_data.append(employee)
 
-    # Button to add a new student
-    if st.button("Add Student"):
-        add_student()
+    # Button to add a new employee
+    if st.button("Add Employee"):
+        add_employee()
 
     # Display details as a table
-    if student_data:
-        st.subheader("Student Details")
-        df = pd.DataFrame([vars(student) for student in student_data])
+    if employee_data:
+        st.subheader("Employee Details")
+        df = pd.DataFrame([vars(employee) for employee in employee_data])
         st.table(df)
 
-        # Calculate overall performance metrics for all students
-        overall_tasks_assigned = sum(student.tasks_assigned for student in student_data)
-        overall_tasks_completed = sum(student.tasks_completed for student in student_data)
-        overall_tasks_in_progress = sum(student.tasks_in_progress for student in student_data)
-        overall_leaves_taken = sum(student.leaves_taken for student in student_data)
+        # Calculate overall performance metrics for all employees
+        overall_tasks_assigned = sum(employee.tasks_assigned for employee in employee_data)
+        overall_tasks_completed = sum(employee.tasks_completed for employee in employee_data)
+        overall_tasks_in_progress = sum(employee.tasks_in_progress for employee in employee_data)
+        overall_leaves_taken = sum(employee.leaves_taken for employee in employee_data)
         overall_task_progress_percentage = (overall_tasks_completed / overall_tasks_assigned) * 100 if overall_tasks_assigned > 0 else 0.0
 
         # Display overall performance status

@@ -20,6 +20,9 @@ class EmployeePerformanceCalculator:
 def main():
     st.title("Employee Performance Calculator")
 
+    # Section to enter the number of employees
+    num_employees = st.number_input("Enter the number of employees:", min_value=1, value=1, step=1)
+
     # Data storage
     employee_data = []
 
@@ -36,8 +39,9 @@ def main():
         employee_data.append(employee)
 
     # Button to add a new employee
-    if st.button("Add Employee"):
-        add_employee()
+    for _ in range(num_employees):
+        if st.button(f"Add Employee {_ + 1}"):
+            add_employee()
 
     # Display details as a table
     if employee_data:

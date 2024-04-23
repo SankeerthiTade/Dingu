@@ -1,2 +1,2 @@
-# Dingu
+# DinguSankeeerthi
 App
